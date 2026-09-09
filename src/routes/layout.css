@@ -43,6 +43,13 @@
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
   --spacing-section: 96px;
+
+  --animate-marquee: marquee 25s linear infinite;
+
+  @keyframes marquee {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
 }
 
 @layer base {

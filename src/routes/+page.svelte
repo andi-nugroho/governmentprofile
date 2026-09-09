@@ -1,78 +1,134 @@
 <script lang="ts">
     import { fly, fade } from 'svelte/transition';
     import { dataWilayah, daftarBerita } from '$lib/data/mock';
+    import { onMount } from 'svelte';
+    import { tweened } from 'svelte/motion';
+    import { cubicOut } from 'svelte/easing';
 
     const latestNews = daftarBerita.slice(0, 3);
+    
+    let hariIni = $state('Memuat...');
+
+    const countPenduduk = tweened(0, { duration: 2500, easing: cubicOut });
+    const countLuas = tweened(0, { duration: 2500, easing: cubicOut });
+    const countDusun = tweened(0, { duration: 2500, easing: cubicOut });
+
+    onMount(() => {
+        hariIni = new Date().toLocaleDateString('id-ID', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: '2-digit'
+        });
+    });
+
+    function viewport(element: HTMLElement) {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                countPenduduk.set(3420);
+                countLuas.set(35.519);
+                countDusun.set(4);
+            } else {
+                countPenduduk.set(0, {duration: 0});
+                countLuas.set(0, {duration: 0});
+                countDusun.set(0, {duration: 0});
+            }
+        }, { threshold: 0.1 });
+        
+        observer.observe(element);
+        return {
+            destroy() {
+                observer.disconnect();
+            }
+        };
+    }
 </script>
 
 <!-- Hero Section -->
-<section class="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-surface-dark py-20">
-    <!-- Abstract Background Pattern -->
-    <div class="absolute inset-0 opacity-10 pointer-events-none">
-        <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <path d="M0,0 L100,0 L100,100 L0,100 Z" fill="none" stroke="currentColor" stroke-width="0.5" />
-            <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="0.5" />
-            <circle cx="50" cy="50" r="20" fill="none" stroke="currentColor" stroke-width="0.5" />
-            <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" stroke-width="0.5" />
-            <line x1="50" y1="0" x2="50" y2="100" stroke="currentColor" stroke-width="0.5" />
-        </svg>
+<section class="relative min-h-[90vh] md:min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Full Background Image -->
+    <div class="absolute inset-0 z-0">
+        <img 
+            src="/assets/desa-pajawanlor.png" 
+            alt="Suasana Desa Pajawanlor" 
+            class="w-full h-full object-cover"
+            onerror={(e) => { e.currentTarget.src='https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=1600&q=80'; e.currentTarget.onerror=null; }}
+        />
+        <!-- Dark Overlay for Readability -->
+        <div class="absolute inset-0 bg-surface-dark/75 backdrop-blur-[2px]"></div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+    <!-- Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-20 pb-64 md:pb-40">
+        <div class="max-w-4xl text-center mx-auto" in:fly={{y: 50, duration: 1000, delay: 100}}>
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-pill bg-canvas/10 text-on-dark border border-on-dark/20 text-xs md:text-sm font-medium mb-6 md:mb-8 backdrop-blur-md mx-auto">
+                <span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(78,159,61,0.8)]"></span>
+                Portal Informasi Resmi
+            </div>
             
-            <div class="max-w-2xl" in:fly={{y: 50, duration: 1000, delay: 100}}>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-pill bg-canvas/10 text-on-dark border border-on-dark/20 text-sm font-medium mb-6 backdrop-blur-sm">
-                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                    Portal Informasi Resmi
+            <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display text-on-dark leading-[1.1] tracking-tight mb-3 md:mb-4">
+                Selamat Datang di Website Resmi Desa <span class="text-primary-disabled">Pajawanlor</span>
+            </h1>
+            
+            <p class="text-lg sm:text-2xl text-primary font-medium font-body mb-6 md:mb-8">
+                Kecamatan Ciawigebang, Kabupaten Kuningan
+            </p>
+            
+            <p class="text-base sm:text-xl md:text-2xl text-on-dark-soft font-body leading-relaxed mb-8 md:mb-12 mx-auto max-w-2xl px-2">
+                Menyajikan transparansi, sejarah budaya, dan pelayanan publik secara digital untuk kesejahteraan warga dan kemajuan bersama.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-[280px] sm:max-w-none mx-auto">
+                <a href="/profil-desa" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-md bg-primary text-on-primary font-medium text-base md:text-lg transition-all hover:bg-primary-active hover:scale-105 focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none shadow-lg">
+                    Jelajahi Sejarah
+                </a>
+                <a href="/data-desa" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-md bg-transparent text-on-dark border border-on-dark/30 font-medium text-base md:text-lg transition-all hover:bg-on-dark/20 hover:border-on-dark/50 focus:ring-2 focus:ring-offset-2 focus:ring-on-dark focus:outline-none backdrop-blur-sm">
+                    Data Penduduk
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Bar at Bottom -->
+    <div use:viewport class="absolute bottom-0 left-0 w-full z-10 bg-gradient-to-t from-surface-dark via-surface-dark/80 to-transparent pt-32 pb-8 pointer-events-none">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-auto">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-12 border-t border-on-dark/20 pt-8" in:fade={{duration: 1200, delay: 500}}>
+                <div class="text-center">
+                    <p class="text-on-dark-soft text-sm font-medium mb-1 uppercase tracking-widest">Penduduk</p>
+                    <p class="text-3xl md:text-4xl font-display text-on-dark tracking-tight">{Math.floor($countPenduduk).toLocaleString('id-ID')}</p>
                 </div>
-                
-                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-display text-on-dark leading-[1.05] tracking-tight mb-6">
-                    Pemerintahan Desa <br/>
-                    <span class="text-primary-disabled">Pajawanlor</span>
-                </h1>
-                
-                <p class="text-lg sm:text-xl text-on-dark-soft font-body leading-relaxed mb-8 max-w-lg">
-                    Menyajikan transparansi, sejarah budaya, dan pelayanan publik secara digital untuk kesejahteraan warga dan kemajuan bersama.
-                </p>
-                
-                <div class="flex flex-wrap items-center gap-4">
-                    <a href="/profil-desa" class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-primary text-on-primary font-medium transition-colors hover:bg-primary-active focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none">
-                        Jelajahi Sejarah Desa
-                    </a>
-                    <a href="/data-desa" class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-transparent text-on-dark border border-on-dark/20 font-medium transition-colors hover:bg-on-dark/10 focus:ring-2 focus:ring-offset-2 focus:ring-on-dark focus:outline-none">
-                        Lihat Data Penduduk
-                    </a>
+                <div class="text-center">
+                    <p class="text-on-dark-soft text-sm font-medium mb-1 uppercase tracking-widest">Luas Wilayah</p>
+                    <p class="text-3xl md:text-4xl font-display text-on-dark tracking-tight">{$countLuas.toFixed(3)}</p>
+                </div>
+                <div class="text-center col-span-2 md:col-span-1 border-t md:border-t-0 md:border-l border-on-dark/20 pt-6 md:pt-0 md:pl-12">
+                    <p class="text-on-dark-soft text-sm font-medium mb-1 uppercase tracking-widest">Dusun</p>
+                    <p class="text-3xl md:text-4xl font-display text-on-dark tracking-tight">{Math.floor($countDusun)}</p>
                 </div>
             </div>
-
-            <div class="relative rounded-xl overflow-hidden shadow-2xl aspect-[4/3] lg:aspect-square bg-surface-card" in:fade={{duration: 1200, delay: 300}}>
-                <img 
-                    src="/assets/desa-pajawanlor.png" 
-                    alt="Suasana Desa Pajawanlor" 
-                    class="object-cover w-full h-full hover:scale-105 transition-transform duration-700" 
-                    onerror={(e) => { e.currentTarget.src='https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=800&q=80'; e.currentTarget.onerror=null; }}
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-surface-dark/80 to-transparent pointer-events-none"></div>
-                
-                <!-- Quick Stats Badge over Image -->
-                <div class="absolute bottom-6 left-6 right-6 p-6 rounded-lg bg-surface-dark/40 backdrop-blur-md border border-on-dark/10">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-on-dark-soft text-sm font-medium mb-1">Populasi Penduduk</p>
-                            <p class="text-3xl font-display text-on-dark tracking-tight">{dataWilayah.penduduk.jiwa}</p>
-                        </div>
-                        <div>
-                            <p class="text-on-dark-soft text-sm font-medium mb-1">Luas Wilayah</p>
-                            <p class="text-3xl font-display text-on-dark tracking-tight">{dataWilayah.luas.split(' ')[0]}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 </section>
+
+<!-- Running Text / Marquee -->
+<div class="w-full flex items-stretch h-12 md:h-14 bg-surface-dark border-b border-primary/20 overflow-hidden">
+    <!-- Date section (Darker background) -->
+    <div class="bg-ink text-canvas font-medium px-4 md:px-8 flex items-center shrink-0 z-10 relative">
+        <span class="text-sm md:text-base whitespace-nowrap">{hariIni}</span>
+        <!-- Decorative slants -->
+        <div class="absolute -right-4 top-0 h-full flex">
+            <div class="w-3 h-full bg-[#FDE047] -skew-x-12 ml-1"></div>
+            <div class="w-1.5 h-full bg-primary -skew-x-12 ml-1"></div>
+        </div>
+    </div>
+    
+    <!-- Marquee section (Green background) -->
+    <div class="flex-grow bg-primary flex items-center relative pl-8">
+        <div class="whitespace-nowrap inline-block animate-marquee text-on-primary font-medium text-sm md:text-base tracking-wide flex-shrink-0 w-full">
+            Selamat Datang di Website Resmi Desa Pajawanlor Kecamatan Ciawigebang Kabupaten Kuningan. Melayani masyarakat dengan sepenuh hati demi mewujudkan desa yang mandiri, inovatif, dan sejahtera.
+        </div>
+    </div>
+</div>
 
 <!-- Berita Terkini Section -->
 <section class="py-section bg-canvas">
