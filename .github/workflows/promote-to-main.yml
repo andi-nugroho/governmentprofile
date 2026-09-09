@@ -1,0 +1,36 @@
+name: Promote to Main
+
+on:
+  push:
+    branches:
+      - development
+      - staging
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Confirm promotion to main'
+        required: true
+        type: boolean
+
+jobs:
+  promote:
+    name: Promote to Main Branch
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge to main
+        run: |
+          git checkout main
+          git merge origin/${{ github.ref_name }} --no-ff -m "chore: promote ${{ github.ref_name }} to main"
+          git push origin main
